@@ -1,78 +1,64 @@
-import {
-  IsString,
-  IsNumber,
-  IsArray,
-  IsEmail,
-  ValidateNested,
-} from 'class-validator';
+import { IsString, IsNumber, ValidateNested, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
 
-//Входящие DTO
-
+// ВХОД (от фронта)
 export class CreateOrderTicketDto {
   @IsString()
-  filmId: string;
+  film: string;
 
   @IsString()
-  sessionId: string;
+  session: string;
+
+  @IsString()
+  daytime: string;
 
   @IsNumber()
   row: number;
 
   @IsNumber()
   seat: number;
+
+  @IsNumber()
+  price: number;
 }
 
 export class CreateOrderDto {
-  @IsEmail()
-  email: string;
-
-  @IsString()
-  phone: string;
-
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateOrderTicketDto)
   tickets: CreateOrderTicketDto[];
 }
 
-//Исходящие DTO
-
+// ВЫХОД: билет, сохранённый в заказе
 export class TicketResultDto {
   @IsString()
-  ticketId: string;
-
-  @IsNumber()
-  price: number;
+  id: string;
 
   @IsString()
-  filmId: string;
+  film: string;
 
   @IsString()
-  sessionId: string;
+  session: string;
+
+  @IsString()
+  daytime: string;
 
   @IsNumber()
   row: number;
 
   @IsNumber()
   seat: number;
-}
-
-export class OrderResultDto {
-  @IsString()
-  orderId: string;
 
   @IsNumber()
-  totalPrice: number;
+  price: number;
+}
 
-  @IsEmail()
-  email: string;
+// ВЫХОД: ответ Order API
+export class OrderResultDto {
+  @IsNumber()
+  total: number;
 
-  @IsString()
-  phone: string;
-
-  @IsArray()
   @ValidateNested({ each: true })
   @Type(() => TicketResultDto)
-  tickets: TicketResultDto[];
+  items: TicketResultDto[];
 }

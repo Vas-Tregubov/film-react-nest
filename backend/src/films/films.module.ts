@@ -9,6 +9,6 @@ import { FilmsRepository } from './films.repository';
   imports: [MongooseModule.forFeature([{ name: Film.name, schema: FilmSchema }])],
   controllers: [FilmsController],
   providers: [FilmsService, FilmsRepository],
-  exports: [FilmsService], // если другие модули захотят использовать FilmsService
+  exports: [FilmsService, FilmsRepository], // если другие модули захотят использовать FilmsService
 })
 export class FilmsModule {}
