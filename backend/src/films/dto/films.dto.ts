@@ -1,8 +1,9 @@
-import { IsNumber, IsString, IsArray } from 'class-validator';
+import { IsNumber, IsString, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class FilmDto {
-  @IsNumber()
-  id: number;
+  @IsString()
+  id: string; // UUID
 
   @IsNumber()
   rating: number;
@@ -15,7 +16,24 @@ export class FilmDto {
   tags: string[];
 
   @IsString()
+  image: string;
+
+  @IsString()
+  cover: string;
+
+  @IsString()
+  title: string;
+
+  @IsString()
+  about: string;
+
+  @IsString()
   description: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ScheduleDto)
+  schedule: ScheduleDto[];
 }
 
 export class ScheduleDto {
@@ -23,8 +41,21 @@ export class ScheduleDto {
   id: string;
 
   @IsString()
-  day: string;
+  daytime: string;
 
-  @IsString()
-  time: string;
+  @IsNumber()
+  hall: number;
+
+  @IsNumber()
+  rows: number;
+
+  @IsNumber()
+  seats: number;
+
+  @IsNumber()
+  price: number;
+
+  @IsArray()
+  @IsString({ each: true })
+  taken: string[];
 }
