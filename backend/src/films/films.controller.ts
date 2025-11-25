@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Post, Body } from '@nestjs/common';
 import { FilmsService } from './films.service';
+import { FilmDto } from './dto/films.dto';
 
 @Controller('films')
 export class FilmsController {
@@ -17,7 +18,7 @@ export class FilmsController {
   }
 
   @Post()
-  addFilms(@Body() films: any[]) {
+  addFilms(@Body() films: FilmDto[]) {
     return this.filmsService.addFilms(films);
   }
 }
