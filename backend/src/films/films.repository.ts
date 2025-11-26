@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Film, FilmDocument } from './films.schema';
+import { Film, FilmDocument, Schedule } from './films.schema';
 
 @Injectable()
 export class FilmsRepository {
@@ -15,7 +15,7 @@ export class FilmsRepository {
     return this.filmModel.findOne({ id }).lean().exec();
   }
 
-  async updateScheduleById(id: string, schedule: any[]) {
+  async updateScheduleById(id: string, schedule: Schedule[]) {
     return this.filmModel.updateOne({ id }, { $set: { schedule } }).exec();
   }
 

@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { FilmsRepository } from './films.repository';
+import { FilmDto } from './dto/films.dto';
 
 @Injectable()
 export class FilmsService {
@@ -15,7 +16,7 @@ export class FilmsService {
     return film.schedule;
   }
 
-  async addFilms(films: any[]) {
+  async addFilms(films: FilmDto[]) {
     return this.filmsRepo.addFilms(films);
   }
 }
