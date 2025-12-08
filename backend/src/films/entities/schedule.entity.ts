@@ -1,44 +1,39 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { Films } from './film.entity';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { Film } from './film.entity';
 
-@Entity()
-export class Schedules {
+@Entity('schedules')
+export class Schedule {
   @PrimaryGeneratedColumn('uuid')
-  @IsString()
-  @IsNotEmpty()
   id: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   daytime: string;
 
   @Column()
-  @IsNumber()
-  @IsNotEmpty()
   hall: number;
 
   @Column()
-  @IsNumber()
-  @IsNotEmpty()
   rows: number;
 
   @Column()
-  @IsNumber()
-  @IsNotEmpty()
   seats: number;
 
-  @Column()
-  @IsNumber()
-  @IsNotEmpty()
+  @Column('double precision')
   price: number;
 
-  @Column()
-  @IsString()
-  @IsNotEmpty()
-  taken: string;
+  @Column('simple-array')
+  taken: string[];
 
-  @ManyToOne(() => Films, (film) => film.schedule)
-  film: Films;
+  @Column('uuid')
+  filmId: string;
+
+  @ManyToOne(() => Film, (film) => film.schedule, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'filmId' })
+  film: Film;
 }

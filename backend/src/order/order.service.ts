@@ -1,74 +1,80 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { FilmsRepository } from '../films/films.repository';
-import { OrderRepository } from './order.repository';
-import { CreateOrderTicketDto } from './dto/order.dto';
-import * as crypto from 'crypto';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import { FilmsRepository } from '../repository/films.repository';
+import { Order, TicketResult } from './dto/order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private readonly filmsRepo: FilmsRepository,
-    private readonly orderRepo: OrderRepository,
-  ) {}
+  constructor(private readonly filmsRepository: FilmsRepository) { }
 
-  async createOrder(tickets: CreateOrderTicketDto[]) {
-    if (!tickets || !tickets.length) {
-      throw new BadRequestException('Tickets array cannot be empty');
-    }
+  async createOrder(order: Order) {
+    try {
+      if (!order.email) throw new BadRequestException('Email is required');
+      if (!order.phone) throw new BadRequestException('Phone number is required');
+      if (order.tickets.length === 0)
+        throw new BadRequestException('No tickets in order');
 
-    let total = 0;
-    const resultTickets = [];
+      const filmId = order.tickets[0].film;
+      const sessionId = order.tickets[0].session;
 
-    for (const t of tickets) {
-      // 1) Находим фильм
-      const film = await this.filmsRepo.findById(t.film);
-      if (!film) throw new BadRequestException('Film not found');
+      const film = await this.filmsRepository.findById(filmId);
+      if (!film) throw new NotFoundException(`Film with id ${filmId} not found`);
 
-      // 2) Находим сеанс
-      const session = film.schedule.find((s) => s.id === t.session);
-      if (!session) throw new BadRequestException('Session not found');
+      const sessionIndex = film.schedule.findIndex(
+        (session) => session.id === sessionId,
+      );
+      if (sessionIndex === -1)
+        throw new NotFoundException(`Sessions with id ${sessionId} not found`);
+      const session = film.schedule[sessionIndex];
 
-      // 3) Проверяем место
-      const seatKey = `${t.row}:${t.seat}`;
-      if (session.taken.includes(seatKey)) {
-        throw new BadRequestException(
-          `Seat already taken: row=${t.row}, seat=${t.seat}`,
-        );
+      const seenSeats = new Set<string>();
+      for (const ticket of order.tickets) {
+        if (ticket.row > session.rows || ticket.seat > session.seats) {
+          throw new UnprocessableEntityException(
+            `Invalid seat for session ${sessionId}: row <= ${session.rows}, seat <= ${session.seats}`
+          );
+        }
+
+        const seatKey = `${ticket.row}-${ticket.seat}`;
+        if (seenSeats.has(seatKey)) {
+          throw new UnprocessableEntityException(`Duplicate seat ${seatKey} in order`);
+        }
+        seenSeats.add(seatKey);
       }
 
-      // 4) Помечаем место занятым
-      session.taken.push(seatKey);
+      const takenSeats = new Set(session.taken || []);
+      for (const ticket of order.tickets) {
+        const seatId = `${ticket.row}-${ticket.seat}`;
+        if (takenSeats.has(seatId))
+          throw new ConflictException(`Seat ${seatId} is already taken`);
+      }
 
-      // 5) Цена — всегда от сеанса
-      const price = session.price;
-      total += price;
+      const newTakenSeats = order.tickets.map(
+        (ticket) => `${ticket.row}:${ticket.seat}`,
+      );
+      const updateTaken = [...takenSeats, ...newTakenSeats];
 
-      // 6) Формируем билет под DTO
-      resultTickets.push({
-        id: crypto.randomUUID(),
-        film: t.film,
-        session: t.session,
-        daytime: t.daytime,
-        row: t.row,
-        seat: t.seat,
-        price,
-      });
+      film.schedule[sessionIndex].taken = updateTaken;
+      await this.filmsRepository.updateFilm(film);
 
-      // 7) сохраняем фильм с обновлённым taken[]
-      await this.filmsRepo.updateScheduleById(film.id, film.schedule);
+      const orderId = Date.now().toString();
+
+      const result: TicketResult[] = order.tickets.map((ticket) => ({
+        ...ticket,
+        id: orderId,
+      }));
+
+      return {
+        total: result.length,
+        items: result,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException ||
+        error instanceof BadRequestException ||
+        error instanceof UnprocessableEntityException ||
+        error instanceof ConflictException) {
+        throw error;
+      }
+      throw new BadRequestException('Failed to create order');
     }
-
-    // 8) Сохраняем заказ
-    await this.orderRepo.create({
-      orderId: crypto.randomUUID(),
-      totalPrice: total,
-      tickets: resultTickets,
-    });
-
-    // 9) Возвращаем ответ строго под OrderResultDto
-    return {
-      total,
-      items: resultTickets,
-    };
   }
 }

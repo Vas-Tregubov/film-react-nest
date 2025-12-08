@@ -1,54 +1,35 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Schedules } from './schedule.entity';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Schedule } from './schedule.entity';
 
-@Entity()
-export class Films {
+@Entity('films')
+export class Film {
   @PrimaryGeneratedColumn('uuid')
-  @IsString()
-  @IsNotEmpty()
   id: string;
 
-  @Column()
-  @IsNumber()
-  @IsNotEmpty()
+  @Column('double precision')
   rating: number;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   director: string;
 
-  @Column()
-  @IsString()
-  @IsNotEmpty()
-  tags: string;
+  @Column('simple-array')
+  tags: string[];
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   image: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   cover: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   title: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   about: string;
 
   @Column()
-  @IsString()
-  @IsNotEmpty()
   description: string;
 
-  @OneToMany(() => Schedules, (schedule) => schedule.film)
-  schedule: Schedules[];
+  @OneToMany(() => Schedule, (schedule) => schedule.film, { cascade: true })
+  schedule: Schedule[];
 }
