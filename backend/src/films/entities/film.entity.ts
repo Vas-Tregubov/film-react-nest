@@ -6,30 +6,32 @@ export class Film {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column('double precision')
+  @Column({ type: 'float' })
   rating: number;
 
-  @Column()
+  @Column({ type: 'text' })
   director: string;
 
-  @Column('simple-array')
+  @Column({ type: 'jsonb', default: [] })
   tags: string[];
 
-  @Column()
+  @Column({ type: 'text' })
   image: string;
 
-  @Column()
+  @Column({ type: 'text' })
   cover: string;
 
-  @Column()
+  @Column({ type: 'text' })
   title: string;
 
-  @Column()
+  @Column({ type: 'text' })
   about: string;
 
-  @Column()
+  @Column({ type: 'text' })
   description: string;
 
-  @OneToMany(() => Schedule, (schedule) => schedule.film, { cascade: true })
-  schedule: Schedule[];
+  @OneToMany(() => Schedule, (schedules) => schedules.film, {
+    cascade: ['insert', 'update'],
+  })
+  schedules: Schedule[];
 }

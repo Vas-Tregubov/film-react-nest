@@ -7,7 +7,7 @@ export class FilmsService {
 
   async getAllFilms() {
     try {
-      const films = await this.filmRepository.findAll();
+      const films = await this.filmRepository.findAll({ take: 50 });
 
       return {
         total: films.length,
@@ -26,8 +26,8 @@ export class FilmsService {
       if (!film) throw new NotFoundException('Film not found');
 
       return {
-        total: film.schedule.length,
-        items: film.schedule,
+        total: film.schedules.length,
+        items: film.schedules,
       };
     } catch (error) {
       if (error instanceof NotFoundException) {

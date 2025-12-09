@@ -22,7 +22,7 @@ import { Schedule } from './films/entities/schedule.entity';
       serveRoot: '/content/afisha',
     }),
     FilmsModule,
-    OrderModule,
+    OrderModule, 
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',

@@ -1,11 +1,12 @@
-//TODO описать DTO для запросов к /films'
-import { IsArray, IsNumber, IsString } from "class-validator";
+import { IsArray, IsNumber, IsString, Max, Min } from "class-validator";
 
 export class FilmDto {
   @IsString()
   id: string;
 
   @IsNumber()
+  @Min(0)
+  @Max(10)
   rating: number;
 
   @IsString()

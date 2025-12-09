@@ -33,7 +33,7 @@ export class Schedule {
   @Column('uuid')
   filmId: string;
 
-  @ManyToOne(() => Film, (film) => film.schedule, { onDelete: 'CASCADE' })
+  @ManyToOne(() => Film, (film) => film.schedules, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'filmId' })
   film: Film;
 }

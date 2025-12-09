@@ -14,8 +14,10 @@ export class FilmsRepository {
     private readonly scheduleRepository: Repository<Schedule>,
   ) {}
 
-  async findAll(): Promise<Film[]> {
-    return this.filmRepository.find();
+  async findAll(options?: { take?: number }) {
+    return this.filmRepository.find({
+      take: options?.take ?? 50,
+    });
   }
 
   async findById(id: string): Promise<Film | null> {

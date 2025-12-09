@@ -1,61 +1,95 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { FilmsRepository } from '../repository/films.repository';
 import { Order, TicketResult } from './dto/order.dto';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly filmsRepository: FilmsRepository) { }
+  constructor(private readonly filmsRepository: FilmsRepository) {}
+
+  private buildSeatKey(row: number, seat: number) {
+    return `${row}-${seat}`;
+  }
 
   async createOrder(order: Order) {
     try {
-      if (!order.email) throw new BadRequestException('Email is required');
-      if (!order.phone) throw new BadRequestException('Phone number is required');
-      if (order.tickets.length === 0)
-        throw new BadRequestException('No tickets in order');
-
+        // Проверяем, что все билеты относятся к одному фильму
       const filmId = order.tickets[0].film;
-      const sessionId = order.tickets[0].session;
+      if (!order.tickets.every((t) => t.film === filmId)) {
+        throw new BadRequestException(
+          'All tickets in the order must belong to the same film',
+        );
+      }
 
       const film = await this.filmsRepository.findById(filmId);
       if (!film) throw new NotFoundException(`Film with id ${filmId} not found`);
 
-      const sessionIndex = film.schedule.findIndex(
-        (session) => session.id === sessionId,
-      );
-      if (sessionIndex === -1)
-        throw new NotFoundException(`Sessions with id ${sessionId} not found`);
-      const session = film.schedule[sessionIndex];
+      // Группируем билеты по sessionId
+      const ticketsBySession = new Map<string, typeof order.tickets>();
 
-      const seenSeats = new Set<string>();
       for (const ticket of order.tickets) {
-        if (ticket.row > session.rows || ticket.seat > session.seats) {
-          throw new UnprocessableEntityException(
-            `Invalid seat for session ${sessionId}: row <= ${session.rows}, seat <= ${session.seats}`
-          );
+        if (!ticketsBySession.has(ticket.session)) {
+          ticketsBySession.set(ticket.session, []);
         }
-
-        const seatKey = `${ticket.row}-${ticket.seat}`;
-        if (seenSeats.has(seatKey)) {
-          throw new UnprocessableEntityException(`Duplicate seat ${seatKey} in order`);
-        }
-        seenSeats.add(seatKey);
+        ticketsBySession.get(ticket.session)!.push(ticket);
       }
 
-      const takenSeats = new Set(session.taken || []);
-      for (const ticket of order.tickets) {
-        const seatId = `${ticket.row}-${ticket.seat}`;
-        if (takenSeats.has(seatId))
-          throw new ConflictException(`Seat ${seatId} is already taken`);
+      // Для каждого сеанса проверяем места
+      for (const [sessionId, tickets] of ticketsBySession.entries()) {
+        const session = film.schedules.find((s) => s.id === sessionId);
+
+        if (!session) {
+          throw new NotFoundException(`Session with id ${sessionId} not found`);
+        }
+
+        // Проверка корректности ряд/место
+        for (const ticket of tickets) {
+          if (ticket.row > session.rows || ticket.seat > session.seats) {
+            throw new UnprocessableEntityException(
+              `Invalid seat for session ${sessionId}. Max row=${session.rows}, max seat=${session.seats}`,
+            );
+          }
+        }
+
+        // Проверка дубликатов внутри одного заказа
+        const seenSeats = new Set<string>();
+
+        for (const ticket of tickets) {
+          const key = this.buildSeatKey(ticket.row, ticket.seat);
+          if (seenSeats.has(key)) {
+            throw new UnprocessableEntityException(
+              `Duplicate seat ${key} in the order`,
+            );
+          }
+          seenSeats.add(key);
+        }
+
+        // Проверка занятых мест в базе
+        const takenSeats = new Set(session.taken ?? []);
+
+        for (const ticket of tickets) {
+          const key = this.buildSeatKey(ticket.row, ticket.seat);
+          if (takenSeats.has(key)) {
+            throw new ConflictException(`Seat ${key} is already taken`);
+          }
+        }
+
+        // Добавляем новые занятые места
+        const newTaken = tickets.map((t) =>
+          this.buildSeatKey(t.row, t.seat),
+        );
+        session.taken = [...takenSeats, ...newTaken];
       }
 
-      const newTakenSeats = order.tickets.map(
-        (ticket) => `${ticket.row}:${ticket.seat}`,
-      );
-      const updateTaken = [...takenSeats, ...newTakenSeats];
-
-      film.schedule[sessionIndex].taken = updateTaken;
+      // Сохраняем обновлённые сессии
       await this.filmsRepository.updateFilm(film);
 
+      // Генерация ответа
       const orderId = Date.now().toString();
 
       const result: TicketResult[] = order.tickets.map((ticket) => ({
@@ -68,12 +102,15 @@ export class OrderService {
         items: result,
       };
     } catch (error) {
-      if (error instanceof NotFoundException ||
+      if (
+        error instanceof NotFoundException ||
         error instanceof BadRequestException ||
         error instanceof UnprocessableEntityException ||
-        error instanceof ConflictException) {
+        error instanceof ConflictException
+      ) {
         throw error;
       }
+
       throw new BadRequestException('Failed to create order');
     }
   }
