@@ -1,9 +1,22 @@
-export const configProvider = (): AppConfig => ({
-  database: {
-    url: process.env.DATABASE_URL || 'mongodb://localhost:27017/afisha',
-    driver: process.env.DATABASE_DRIVER || 'mongodb',
+import { ConfigModule } from '@nestjs/config';
+
+export const configProvider = {
+  imports: [ConfigModule.forRoot()],
+  provide: 'CONFIG',
+  useValue: <AppConfig>{
+    //TODO прочесть переменнные среды
+    database: {
+      driver: process.env.DATABASE_DRIVER.trim(),
+      url: process.env.DATABASE_URL.trim(),
+      type: (process.env.DATABASE_TYPE.trim() as 'postgres') || 'postgres',
+      host: process.env.DATABASE_HOST.trim(),
+      port: parseInt(process.env.DATABASE_PORT.trim()) || 5432,
+      username: process.env.DATABASE_USERNAME.trim(),
+      password: process.env.DATABASE_PASSWORD.trim(),
+      database: process.env.DATABASE_NAME.trim(),
+    },
   },
-});
+};
 
 export interface AppConfig {
   database: AppConfigDatabase;
@@ -12,4 +25,10 @@ export interface AppConfig {
 export interface AppConfigDatabase {
   driver: string;
   url: string;
+  type: string;
+  host: string;
+  port: string | number;
+  username: string;
+  password: string;
+  database: string;
 }

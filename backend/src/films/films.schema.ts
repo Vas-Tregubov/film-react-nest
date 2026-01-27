@@ -1,63 +1,54 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument } from 'mongoose';
+import mongoose, { Document, Schema } from 'mongoose';
 
-export type FilmDocument = HydratedDocument<Film>;
-
-@Schema()
-export class Schedule {
-  @Prop({ required: true })
+export interface Session extends Document {
   id: string;
-
-  @Prop({ required: true })
+  film: string;
   daytime: string;
-
-  @Prop({ required: true })
-  hall: number;
-
-  @Prop({ required: true })
+  day: string;
+  time: string;
+  hall: string;
   rows: number;
-
-  @Prop({ required: true })
   seats: number;
-
-  @Prop({ required: true })
   price: number;
-
-  @Prop({ default: [] })
   taken: string[];
 }
 
-@Schema()
-export class Film {
-  @Prop({ required: true })
+export interface Film extends Document {
   id: string;
-
-  @Prop({ required: true })
   rating: number;
-
-  @Prop({ required: true })
   director: string;
-
-  @Prop({ required: true })
   tags: string[];
-
-  @Prop({ required: true })
-  image: string;
-
-  @Prop({ required: true })
-  cover: string;
-
-  @Prop({ required: true })
   title: string;
-
-  @Prop({ required: true })
   about: string;
-
-  @Prop({ required: true })
   description: string;
-
-  @Prop({ required: true, type: [Schedule] })
-  schedule: Schedule[];
+  image: string;
+  cover: string;
+  schedule: Session[];
 }
 
-export const FilmSchema = SchemaFactory.createForClass(Film);
+const SessionSchema = new Schema<Session>({
+  id: { type: String, required: true },
+  film: { type: String, required: true },
+  daytime: { type: String, required: true },
+  day: { type: String, required: true },
+  time: { type: String, required: true },
+  hall: { type: String, required: true },
+  rows: { type: Number, required: true },
+  seats: { type: Number, required: true },
+  price: { type: Number, required: true },
+  taken: { type: [String], default: [] },
+});
+
+const FilmSchema = new Schema<Film>({
+  rating: { type: Number, required: true },
+  director: { type: String, required: true },
+  tags: { type: [String], default: [] },
+  title: { type: String, required: true },
+  about: { type: String, required: true },
+  description: { type: String, required: true },
+  image: { type: String, required: true },
+  cover: { type: String, required: true },
+  schedule: { type: [SessionSchema], default: [] },
+});
+
+export const FilmModel = mongoose.model<Film>('Film', FilmSchema);

@@ -1,11 +1,12 @@
-import { IsNumber, IsString, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsArray, IsNumber, IsString, Max, Min } from "class-validator";
 
 export class FilmDto {
   @IsString()
-  id: string; // UUID
+  id: string;
 
   @IsNumber()
+  @Min(0)
+  @Max(10)
   rating: number;
 
   @IsString()
@@ -16,12 +17,6 @@ export class FilmDto {
   tags: string[];
 
   @IsString()
-  image: string;
-
-  @IsString()
-  cover: string;
-
-  @IsString()
   title: string;
 
   @IsString()
@@ -30,21 +25,31 @@ export class FilmDto {
   @IsString()
   description: string;
 
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ScheduleDto)
-  schedule: ScheduleDto[];
+  @IsString()
+  image: string;
+
+  @IsString()
+  cover: string;
 }
 
-export class ScheduleDto {
+export class SessionDto {
   @IsString()
   id: string;
 
   @IsString()
+  film: string;
+
+  @IsString()
   daytime: string;
 
-  @IsNumber()
-  hall: number;
+  @IsString()
+  day: string;
+
+  @IsString()
+  time: string;
+
+  @IsString()
+  hall: string;
 
   @IsNumber()
   rows: number;

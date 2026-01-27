@@ -1,22 +1,40 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { FilmsRepository } from './films.repository';
-import { FilmDto } from './dto/films.dto';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { FilmsRepository } from '../repository/films.repository';
 
 @Injectable()
 export class FilmsService {
-  constructor(private readonly filmsRepo: FilmsRepository) {}
+  constructor(private readonly filmRepository: FilmsRepository) {}
 
-  async getAll() {
-    return this.filmsRepo.findAll();
+  async getAllFilms() {
+    try {
+      const films = await this.filmRepository.findAll({ take: 50 });
+
+      return {
+        total: films.length,
+        items: films,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch films');
+    }
   }
 
-  async getSchedule(filmId: string) {
-    const film = await this.filmsRepo.findById(filmId);
-    if (!film) throw new NotFoundException('Film not found');
-    return film.schedule;
-  }
+  async getFilmSchedule(id: string) {
+    try {
+      if(!id) throw new BadRequestException('Film ID is required');
+      
+      const film = await this.filmRepository.findById(id);
+      if (!film) throw new NotFoundException('Film not found');
 
-  async addFilms(films: FilmDto[]) {
-    return this.filmsRepo.addFilms(films);
+      return {
+        total: film.schedules.length,
+        items: film.schedules,
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
+      throw new BadRequestException('Invalid film ID');
+    }
   }
 }
