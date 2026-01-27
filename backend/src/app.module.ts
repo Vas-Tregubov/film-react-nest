@@ -1,32 +1,19 @@
 import { Module } from '@nestjs/common';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { join } from 'node:path';
-import { MongooseModule } from '@nestjs/mongoose';
+import {ServeStaticModule} from "@nestjs/serve-static";
+import {ConfigModule} from "@nestjs/config";
+import * as path from "node:path";
 
-import { configProvider } from './app.config.provider';
-import { FilmsModule } from './films/films.module';
-import { OrderModule } from './order/order.module';
+import {configProvider} from "./app.config.provider";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      load: [configProvider],
-      isGlobal: true,
-      cache: true,
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        uri: config.get<string>('database.url'),
+	ConfigModule.forRoot({
+          isGlobal: true,
+          cache: true
       }),
-      inject: [ConfigService],
-    }),
-    FilmsModule,
-    OrderModule,
+      // @todo: Добавьте раздачу статических файлов из public
   ],
+  controllers: [],
+  providers: [configProvider],
 })
 export class AppModule {}
