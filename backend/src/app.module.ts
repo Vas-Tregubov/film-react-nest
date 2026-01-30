@@ -22,7 +22,7 @@ import { Schedule } from './films/entities/schedule.entity';
       serveRoot: '/content/afisha',
     }),
     FilmsModule,
-    OrderModule, 
+    OrderModule,
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
@@ -34,10 +34,10 @@ import { Schedule } from './films/entities/schedule.entity';
         entities: [Film, Schedule],
         synchronize: true,
       }),
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
   ],
   controllers: [],
   providers: [configProvider],
 })
-export class AppModule { }
+export class AppModule {}

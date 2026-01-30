@@ -18,7 +18,7 @@ export class OrderService {
 
   async createOrder(order: Order) {
     try {
-        // Проверяем, что все билеты относятся к одному фильму
+      // Проверяем, что все билеты относятся к одному фильму
       const filmId = order.tickets[0].film;
       if (!order.tickets.every((t) => t.film === filmId)) {
         throw new BadRequestException(
@@ -27,7 +27,8 @@ export class OrderService {
       }
 
       const film = await this.filmsRepository.findById(filmId);
-      if (!film) throw new NotFoundException(`Film with id ${filmId} not found`);
+      if (!film)
+        throw new NotFoundException(`Film with id ${filmId} not found`);
 
       // Группируем билеты по sessionId
       const ticketsBySession = new Map<string, typeof order.tickets>();
@@ -80,9 +81,7 @@ export class OrderService {
         }
 
         // Добавляем новые занятые места
-        const newTaken = tickets.map((t) =>
-          this.buildSeatKey(t.row, t.seat),
-        );
+        const newTaken = tickets.map((t) => this.buildSeatKey(t.row, t.seat));
         session.taken = [...takenSeats, ...newTaken];
       }
 
