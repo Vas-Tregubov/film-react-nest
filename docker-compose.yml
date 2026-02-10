@@ -1,7 +1,7 @@
 services:
   backend:
     container_name: backend
-    image: ghcr.io/neropack/backend:latest
+    image: ghcr.io/vas-tregubov/backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -25,7 +25,7 @@ services:
 
   frontend:
     container_name: frontend
-    image: ghcr.io/neropack/frontend:latest
+    image: ghcr.io/vas-tregubov/frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
