@@ -1,2 +1,69 @@
-node_modules
-.idea
+# ===========================
+# Node / JS / Frontend / Backend
+# ===========================
+node_modules/
+dist/
+build/
+*.log
+
+# ===========================
+# Environment files
+# ===========================
+.env
+.env.*.local
+
+# ===========================
+# Runtime data
+# ===========================
+pids/
+*.pid
+*.seed
+*.pid.lock
+.temp/
+.tmp/
+
+# ===========================
+# Logs
+# ===========================
+logs/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+lerna-debug.log*
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+Thumbs.db
+
+# ===========================
+# Tests / Coverage
+# ===========================
+coverage/
+.nyc_output/
+
+# ===========================
+# IDEs and editors
+# ===========================
+# IntelliJ / WebStorm / JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Sublime
+*.sublime-workspace
+*.sublime-project
