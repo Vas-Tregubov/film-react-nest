@@ -33,6 +33,8 @@ import { Schedule } from './films/entities/schedule.entity';
         database: configService.get<string>('DATABASE_NAME'),
         entities: [Film, Schedule],
         synchronize: true,
+        retryAttempts: 10,
+        retryDelay: 3000,
       }),
       inject: [ConfigService],
     }),
