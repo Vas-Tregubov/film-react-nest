@@ -1,5 +1,7 @@
 # FILM!
 
+Ссылка: http://vas-tre-film-react-nest.nomorepartiessbs.ru/
+
 ## Установка
 
 ### MongoDB
