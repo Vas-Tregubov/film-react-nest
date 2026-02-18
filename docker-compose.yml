@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: ghcr.io/vas-tregubov/backend:latest
     env_file:
-      - ./backend/.env
+      - ./.env
     ports:
       - "3000:3000"
     depends_on:
@@ -21,6 +21,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     image: ghcr.io/vas-tregubov/frontend:latest
+    env_file:
+      - ./.env
     environment:
       VITE_API_URL: /api/afisha
       VITE_CDN_URL: /content/afisha
