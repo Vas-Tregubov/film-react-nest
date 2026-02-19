@@ -26,8 +26,8 @@ services:
     environment:
       VITE_API_URL: /api/afisha
       VITE_CDN_URL: /content/afisha
-    volumes:
-      - frontend_build:/app/dist
+    # volumes:
+    #   - frontend_build:/app/dist
     networks:
       - app-network
     restart: unless-stopped
@@ -41,7 +41,7 @@ services:
       - backend
       - frontend
     volumes:
-      - frontend_build:/usr/share/nginx/html:ro
+      # - frontend_build:/usr/share/nginx/html:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     networks:
       - app-network
