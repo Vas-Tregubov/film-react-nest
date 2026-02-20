@@ -2,7 +2,7 @@ name: Build and Push Docker Images to GHCR
 on:
   push:
     branches:
-      - feature/review
+      - review-3
 
 jobs:
   build-and-push:
