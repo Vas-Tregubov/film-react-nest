@@ -2,6 +2,8 @@
 
 Ссылка: http://vas-tre-film-react-nest.nomorepartiessbs.ru/
 
+Docker
+
 ## Установка
 
 ### MongoDB
