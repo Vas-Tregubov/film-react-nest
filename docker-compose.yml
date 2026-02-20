@@ -10,12 +10,12 @@ services:
     env_file:
       - ./.env
     environment:
-      # если нужно можно оставить специфичные для бэка переменные, остальные возьмутся из env_file
       DATABASE_HOST: db
     ports:
       - "3000:3000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: on-failure
     networks:
       - app-network
@@ -69,6 +69,11 @@ services:
     restart: on-failure
     networks:
       - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USERNAME} -d ${DATABASE_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgadmin:
     container_name: pgadmin
